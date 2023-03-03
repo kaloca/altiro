@@ -24,13 +24,13 @@ const writePreviousMessage = async (phone_number, assistant, human) => {
   });
 };
 
-const getPreviousMessage = async (from) =>
+const getPreviousMessage = async (from, previous_message) =>
   await get(child(dbRef, `users/${from}`))
     .then((snapshot) => {
       if (snapshot.exists()) {
-        let context = snapshot.val().answer;
-        let question = snapshot.val().question;
-        return { context, question };
+        previous_message.context = snapshot.val().answer;
+        previous_message.question = snapshot.val().question;
+        //return { context, question };
       } else {
         console.log("No data available");
       }
