@@ -8,14 +8,18 @@
 //   presence_penalty: 0,
 // });
 
-const chatprompt = (question) => `The following is a conversation with an AI assistant.\
-The assistant is helpful, creative, clever, and very friendlyndly\
+const chatprompt = (
+  question
+) => `The following is a conversation with an AI assistant.\
+The assistant is helpful, creative, clever, and very friendly\
 Human: Hello, who are you?\
 AI: I am an AI called Altiro. How can I help you today?\
 Human: ${question}?"\
 AI:`;
 
-const chatprompt_ptbr = (question) => `A seguir, uma conversa com um assistente de IA.\
+const chatprompt_ptbr = (
+  question
+) => `A seguir, uma conversa com um assistente de IA.\
 O assistente é prestativo, criativo, inteligente e muito amigável.\
 Humano: Olá, quem é você?\
 AI: Eu sou uma IA chamada Altiro. Como posso ajudá-lo hoje?\

@@ -8,7 +8,7 @@ const request = require("request"),
   body_parser = require("body-parser"),
   axios = require("axios").default,
   { runCompletion } = require("./openai.js"),
-  { writePreviousMessage, getPreviousMessage } = require('./firebase.js'),
+  { writePreviousMessage, getPreviousMessage } = require("./firebase.js"),
   app = express().use(body_parser.json()); // creates express http server
 
 // Sets server port and logs message on success
@@ -35,34 +35,33 @@ app.post("/webhook", async (req, res) => {
         req.body.entry[0].changes[0].value.metadata.phone_number_id;
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-            
+
       let openai_response = "";
       console.log(from);
       // let context = "", question = "";
-      let {context, question} = await getPreviousMessage(from).catch(
+      let { context, question } = await getPreviousMessage(from).catch(
         (error) => {
           console.error(error);
-        });
-      
+        }
+      );
+
       const completion = await runCompletion(question, context, msg_body);
-      
-      for (let result of completion.data.choices){
+
+      for (let result of completion.data.choices) {
         // console.log(result.message);
         openai_response += result.message.content;
       }
-            
+
       let output;
-      
-      if (openai_response.includes("I CAN")){
-        
+
+      if (openai_response.includes("I CAN")) {
         output = "Needs google search - soon";
         console.log("google search");
-
       } else {
         output = openai_response;
         await writePreviousMessage(from, openai_response, msg_body);
       }
-      
+
       await axios({
         method: "POST", // Required, HTTP method, a string, e.g. POST, GET
         url:
@@ -86,12 +85,12 @@ app.post("/webhook", async (req, res) => {
 });
 
 // Accepts GET requests at the /webhook endpoint. You need this URL to setup webhook initially.
-// info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests 
+// info on verification request payload: https://developers.facebook.com/docs/graph-api/webhooks/getting-started#verification-requests
 app.get("/webhook", (req, res) => {
   /**
    * UPDATE YOUR VERIFY TOKEN
    *This will be the Verify Token value when you set up webhook
-  **/
+   **/
   const verify_token = process.env.VERIFY_TOKEN;
 
   // Parse params from the webhook verification request

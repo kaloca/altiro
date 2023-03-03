@@ -9,12 +9,12 @@
   "author": "Altiro",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.3.3",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "firebase": "^9.17.2",
-    "openai": "^3.1.0",
+    "openai": "^3.2.1",
     "request": "^2.88.2"
   },
   "engines": {
