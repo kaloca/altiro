@@ -7,7 +7,7 @@ const request = require("request"),
   express = require("express"),
   body_parser = require("body-parser"),
   axios = require("axios").default,
-  { runCompletion } = require("./openai.js"),
+  { runCompletion, runCompletionWithRetry } = require("./openai.js"),
   { writePreviousMessage, getPreviousMessage } = require("./firebase.js"),
   app = express().use(body_parser.json()); // creates express http server
 
@@ -20,7 +20,7 @@ app.post("/webhook", async (req, res) => {
   let body = req.body;
 
   // Check the Incoming webhook message
-  console.log(JSON.stringify(req.body, null, 2));
+  // console.log(JSON.stringify(req.body, null, 2));
 
   // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
   if (req.body.object) {
@@ -39,13 +39,20 @@ app.post("/webhook", async (req, res) => {
       let openai_response = "";
       console.log(from);
       // let context = "", question = "";
-      let { context, question } = await getPreviousMessage(from).catch(
-        (error) => {
-          console.error(error);
-        }
-      );
 
-      const completion = await runCompletion(question, context, msg_body);
+      let previous_message = {
+        context: "",
+        question: "",
+      };
+
+      await getPreviousMessage(from, previous_message).catch((error) => {
+        console.error(error);
+      });
+
+      let completion;
+      await runCompletionWithRetry(previous_message, msg_body)
+        .then((result) => (completion = result))
+        .catch((error) => console.error(`Error: ${error.message}`));
 
       for (let result of completion.data.choices) {
         // console.log(result.message);
