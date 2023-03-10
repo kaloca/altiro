@@ -7,8 +7,10 @@ const request = require("request"),
   express = require("express"),
   body_parser = require("body-parser"),
   axios = require("axios").default,
-  { runCompletion, runCompletionWithRetry } = require("./openai.js"),
+  { runCompletionSearchWithGPT3, runCompletionWithRetry, testIfCurrentData, getSimpleSearchQuery } = require("./openai.js"),
   { writePreviousMessage, getPreviousMessage } = require("./firebase.js"),
+  { getSnippets } = require("./google"),
+  { serpApiAnswerBox } = require("./serp.js"),
   app = express().use(body_parser.json()); // creates express http server
 
 // Sets server port and logs message on success
@@ -35,7 +37,8 @@ app.post("/webhook", async (req, res) => {
         req.body.entry[0].changes[0].value.metadata.phone_number_id;
       let from = req.body.entry[0].changes[0].value.messages[0].from; // extract the phone number from the webhook payload
       let msg_body = req.body.entry[0].changes[0].value.messages[0].text.body; // extract the message text from the webhook payload
-
+      
+      console.log(msg_body)
       let openai_response = "";
       console.log(from);
       // let context = "", question = "";
@@ -49,20 +52,63 @@ app.post("/webhook", async (req, res) => {
         console.error(error);
       });
 
-      let completion;
-      await runCompletionWithRetry(previous_message, msg_body)
+      let completion, search_query, snippets;
+      
+//       await getSnippets(search_query)
+//       .then((result) => console.log(result))
+//       .catch((error) => console.error(`(getSnippets) Error: ${error.message}`))
+      
+      await runCompletionWithRetry(previous_message, msg_body, snippets)
         .then((result) => (completion = result))
-        .catch((error) => console.error(`Error: ${error.message}`));
-
+        .catch((error) => console.error(`(runCompletionWithRetry) Error: ${error.message}`));
+      
       for (let result of completion.data.choices) {
         // console.log(result.message);
         openai_response += result.message.content;
       }
+      
+      let current_data_test = "";
+      
+      await testIfCurrentData(msg_body, openai_response)
+        .then((result) => current_data_test = result.data.choices[0].message.content)
+        .catch((error) => console.error(`Error: ${error.message}`));
+      
+      
+      let output = openai_response;
+      
+//       await testIfCurrentData(openai_response)
+//         .then((result) => console.log())
+//         .catch((error) => console.error(`Error: ${error.message}`));
+      
 
-      let output;
-
-      if (openai_response.includes("I CAN")) {
-        output = "Needs google search - soon";
+      if (current_data_test.toLowerCase().includes("no")) {
+        await getSimpleSearchQuery(msg_body)
+        .then((result) => search_query = result.data.choices[0].message.content)
+        .catch((error) => console.error(`(getSimpleSearchQuery) Error: ${error.message}`));
+        
+        console.log("Im here");
+        let search_result;
+        
+        await serpApiAnswerBox(search_query)
+        .then((result) => {
+          search_result = JSON.stringify(result);
+          // console.log(search_result);
+        })
+        .catch((error) => console.error(`(serpApiAnswerBox) Error: ${error.message}`));
+        
+        await runCompletionSearchWithGPT3(search_result, msg_body)
+        .then((result) => completion = result.data.choices[0])
+        .catch((error) => console.error(`(runCompletionWithRetry) Error: ${error.message}`));
+        
+        // console.log(completion)
+        openai_response = "";
+        
+        for (let result of completion.text) {
+        // console.log(result.message);
+          openai_response += result;
+        }
+        
+        output = openai_response;
         console.log("google search");
       } else {
         output = openai_response;
