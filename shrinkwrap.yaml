@@ -3,6 +3,7 @@ dependencies:
   body-parser: 1.20.2
   dotenv: 16.0.3
   express: 4.18.2
+  express-rate-limit: 6.7.0
   firebase: 9.17.2
   google-search-results-nodejs: 2.1.0
   googleapis: 112.0.0
@@ -841,6 +842,14 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
+  /express-rate-limit/6.7.0:
+    dev: false
+    engines:
+      node: '>= 12.9.0'
+    peerDependencies:
+      express: ^4 || ^5
+    resolution:
+      integrity: sha512-vhwIdRoqcYB/72TK3tRZI+0ttS8Ytrk24GfmsxDXK9o9IhHNO5bXRiXQSExPQ4GbaE5tvIS7j1SGrxsuWs+sGA==
   /express/4.18.2:
     dependencies:
       accepts: 1.3.8
@@ -1802,6 +1811,7 @@ specifiers:
   body-parser: ^1.20.0
   dotenv: ^16.0.3
   express: ^4.18.1
+  express-rate-limit: ^6.7.0
   firebase: ^9.17.2
   google-search-results-nodejs: ^2.1.0
   googleapis: 112.0.0

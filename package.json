@@ -17,7 +17,8 @@
     "firebase": "^9.17.2",
     "openai": "^3.2.1",
     "googleapis": "112.0.0",
-    "google-search-results-nodejs": "^2.1.0"
+    "google-search-results-nodejs": "^2.1.0",
+    "express-rate-limit": "^6.7.0"
   },
   "engines": {
     "node": "12.x"

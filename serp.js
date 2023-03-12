@@ -18,7 +18,8 @@ const serpApiAnswerBox = async (query) => {
       hl: "en",
       gl: "us",
     });
-    return(data["answer_box"] || data["knowledge_graph"]);
+    // console.log(data);
+    return(data["answer_box"] || data["knowledge_graph"] || data["sports_results"]);
   } catch (error) {
     console.error("there was an error:", error);
   }
